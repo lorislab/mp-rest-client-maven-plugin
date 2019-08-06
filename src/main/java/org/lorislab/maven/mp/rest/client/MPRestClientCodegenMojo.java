@@ -639,7 +639,7 @@ public class MPRestClientCodegenMojo extends AbstractMojo {
         configurator.addAdditionalProperty("beanParamSuffix", beanParamSuffix);
         configurator.addAdditionalProperty("apiName", apiName);
         configurator.addAdditionalProperty("formatterGoogle", formatterGoogle);
-
+        configurator.addAdditionalProperty("beanParamCount", beanParamCount);
 
         final ClientOptInput input = configurator.toClientOptInput();
         final CodegenConfig config = input.getConfig();
