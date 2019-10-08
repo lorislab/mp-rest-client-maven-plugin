@@ -3,9 +3,10 @@
 Microprofile rest client maven plugin
 
 
-[![pipeline status](https://gitlab.com/lorislab/maven/mp-rest-client-codegen/badges/master/pipeline.svg)](https://gitlab.com/lorislab/maven/mp-rest-client-codegen/commits/master)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.lorislab.swagger/mp-rest-client-codegen/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.lorislab.swagger/mp-rest-client-codegen)
+[![License](https://img.shields.io/github/license/lorislab/mp-rest-client-maven-plugin?style=for-the-badge&logo=apache)](https://www.apache.org/licenses/LICENSE-2.0)
+[![CircleCI](https://img.shields.io/circleci/build/github/lorislab/mp-rest-client-maven-plugin?logo=circleci&style=for-the-badge)](https://circleci.com/gh/lorislab/mp-rest-client-maven-plugin)
+[![Maven Central](https://img.shields.io/maven-central/v/org.lorislab.maven/mp-rest-client-maven-plugin?logo=java&style=for-the-badge)](https://maven-badges.herokuapp.com/maven-central/org.lorislab.maven/mp-rest-client-maven-plugin)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/lorislab/mp-rest-client-maven-plugin?logo=github&style=for-the-badge)](https://github.com/lorislab/mp-rest-client-maven-plugin/releases/latest)
 
 ## Configuration parameters
 
@@ -132,4 +133,16 @@ public interface TestTestClient {
   Response showPetById(@PathParam("petId") String petId);
 }
 
+```
+
+## Release process of this plugin
+
+Create new release run
+```bash
+mvn semver-release:release-create
+```
+
+Create new patch branch run
+```bash
+mvn semver-release:patch-create -DpatchVersion=X.X.0
 ```

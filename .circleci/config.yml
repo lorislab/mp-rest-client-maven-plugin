@@ -1,0 +1,70 @@
+defaults: &defaults
+  docker:
+    - image: maven:3.6.1-jdk-11
+  environment:
+    MAVEN_CLI_OPTS: "-s .scripts/.m2/settings.xml --batch-mode"
+    GIT_TEMPLATE_URL: https://github.com/lorislab/ci-template.git
+
+version: 2.1
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: "Configuration"
+          command: git clone $GIT_TEMPLATE_URL .scripts
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            - v1-dependencies-
+      - run:
+          name: "Build"
+          command: mvn $MAVEN_CLI_OPTS package -Prelease
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+  release:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: "Import gpg key"
+          command: echo -e "$GPG_KEY_SECRET" | gpg --batch --import --passphrase "$GPG_PASSPHRASE"
+      - run:
+          name: "Configuration"
+          command: |
+            git clone $GIT_TEMPLATE_URL .scripts
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            - v1-dependencies-
+      - run:
+          name: "Release"
+          command: |
+            mvn $MAVEN_CLI_OPTS semver-release:version-release
+            mvn $MAVEN_CLI_OPTS clean deploy -Dmaven.test.skip=true -Prelease
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+
+workflows:
+  version: 2
+  maven-build:
+    jobs:
+      - build:
+          context: Pipeline
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              only: /.*/
+      - release:
+          context: Pipeline
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/

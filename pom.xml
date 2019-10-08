@@ -6,11 +6,11 @@
     <groupId>org.lorislab.maven</groupId>
     <artifactId>mp-rest-client-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>999-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
 
     <name>mp-rest-client-maven-plugin</name>
-    <description>Microprofile rest client codegen maven plugin</description>
-    <url>https://gitlab.com/lorislab/maven/mp-rest-client-maven-plugin</url>
+    <description>Micro-Profile rest client codegen maven plugin</description>
+    <url>https://github.com/lorislab/mp-rest-client-maven-plugin</url>
 
     <licenses>
         <license>
@@ -21,9 +21,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://gitlab.com/lorislab/maven/mp-rest-client-maven-plugin.git</connection>
-        <developerConnection>scm:git:git@gitlab.com:lorislab/maven/mp-rest-client-maven-plugin.git</developerConnection>
-        <url>https://gitlab.com/lorislab/maven/mp-rest-client-maven-plugin</url>
+        <connection>scm:git:https://github.com/lorislab/mp-rest-client-maven-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:lorislab/mp-rest-client-maven-plugin.git</developerConnection>
+        <url>https://github.com/lorislab/mp-rest-client-maven-plugin</url>
     </scm>
 
     <organization>
@@ -89,6 +89,11 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.lorislab.maven</groupId>
+                <artifactId>semver-release-maven-plugin</artifactId>
+                <version>0.2.0</version>
+            </plugin>
+            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
@@ -125,7 +130,7 @@
     <distributionManagement>
         <site>
             <id>api.wiki</id>
-            <url>https://gitlab.com/lorislab/maven/mp-rest-client-maven-plugin/wikis</url>
+            <url>https://github.com/lorislab/maven/mp-rest-client-maven-plugin/wikis</url>
         </site>
         <snapshotRepository>
             <id>ossrh</id>

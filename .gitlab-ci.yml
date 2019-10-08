@@ -1,3 +1,0 @@
-include:
-  - project: 'lorislab/ci/gitlab-ci-template'
-    file: '.gitlab-ci-maven.yml'
