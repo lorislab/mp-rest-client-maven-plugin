@@ -48,6 +48,8 @@ public class MPRestClientCodegen extends AbstractJavaJAXRSServerCodegen {
 
     private static final String LOMBOK_DATA = "lombokData";
 
+    private static final String FIELD_PUBLIC = "fieldPublic";
+
     private static final String GENERATE_GETTER_SETTER = "generateGetterSetter";
 
     private static final String API_SUFFIX = "apiSuffix";
@@ -93,6 +95,9 @@ public class MPRestClientCodegen extends AbstractJavaJAXRSServerCodegen {
 
     @Getter
     private boolean lombokData = true;
+
+    @Getter
+    private boolean fieldPublic = false;
 
     @Getter
     private boolean generateGetterSetter = false;
@@ -162,6 +167,7 @@ public class MPRestClientCodegen extends AbstractJavaJAXRSServerCodegen {
         additionalProperties.put(GENERATE_REST_CLIENT, generateRestClient);
         additionalProperties.put(BEAN_PARAM_SUFFIX, beanParamSuffix);
         additionalProperties.put(LOMBOK_DATA, lombokData);
+        additionalProperties.put(FIELD_PUBLIC, fieldPublic);
         additionalProperties.put(JSONB, jsonb);
         additionalProperties.put(JACKSON, jackson);
         additionalProperties.put(GENERATE_GETTER_SETTER, generateGetterSetter);
@@ -186,6 +192,7 @@ public class MPRestClientCodegen extends AbstractJavaJAXRSServerCodegen {
         cliOptions.add(CliOption.newBoolean(JACKSON, "Use the jackson annotation.").defaultValue(String.valueOf(jackson)));
         cliOptions.add(CliOption.newBoolean(JSONB, "Use the jsonb property annotation for pojo.").defaultValue(String.valueOf(jsonb)));
         cliOptions.add(CliOption.newBoolean(LOMBOK_DATA, "Use the lombok @Data annotation for pojo.").defaultValue(String.valueOf(lombokData)));
+        cliOptions.add(CliOption.newBoolean(FIELD_PUBLIC, "Public fields in the pojo.").defaultValue(String.valueOf(fieldPublic)));
         cliOptions.add(CliOption.newBoolean(GENERATE_GETTER_SETTER, "Generate getter and setter for pojo.").defaultValue(String.valueOf(generateGetterSetter)));
         cliOptions.add(CliOption.newBoolean(GENERATE_TO_STRING, "Generate toString method for pojo.").defaultValue(String.valueOf(generateToString)));
         cliOptions.add(CliOption.newBoolean(GENERATE_EQUALS, "Generate equals/hash method for pojo.").defaultValue(String.valueOf(generateEquals)));
@@ -288,6 +295,7 @@ public class MPRestClientCodegen extends AbstractJavaJAXRSServerCodegen {
         generateToString = updateBoolean(GENERATE_TO_STRING, generateToString);
         generateGetterSetter = updateBoolean(GENERATE_GETTER_SETTER, generateGetterSetter);
         lombokData = updateBoolean(LOMBOK_DATA, lombokData);
+        fieldPublic = updateBoolean(FIELD_PUBLIC, fieldPublic);
         jackson = updateBoolean(JACKSON, jackson);
         jsonb = updateBoolean(JSONB, jsonb);
         returnResponse = updateBoolean(RETRUN_RESPONSE, returnResponse);

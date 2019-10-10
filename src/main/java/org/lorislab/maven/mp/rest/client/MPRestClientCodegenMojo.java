@@ -374,6 +374,12 @@ public class MPRestClientCodegenMojo extends AbstractMojo {
     private Boolean lombokData;
 
     /**
+     * Make fields in the model public.
+     */
+    @Parameter(name = "fieldPublic", required = false, defaultValue = "false")
+    private Boolean fieldPublic;
+
+    /**
      * Generate setter and getter.
      */
     @Parameter(name = "generateGetterSetter", required = false, defaultValue = "false")
@@ -633,6 +639,7 @@ public class MPRestClientCodegenMojo extends AbstractMojo {
         configurator.addAdditionalProperty("returnResponse", returnResponse);
         configurator.addAdditionalProperty("interfaceOnly", interfaceOnly);
         configurator.addAdditionalProperty("lombokData", lombokData);
+        configurator.addAdditionalProperty("fieldPublic", fieldPublic);
         configurator.addAdditionalProperty("generateGetterSetter", generateGetterSetter);
         configurator.addAdditionalProperty("generateToString", generateToString);
         configurator.addAdditionalProperty("generateEquals", generateEquals);
