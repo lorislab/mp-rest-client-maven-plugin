@@ -1,0 +1,15 @@
+{{#apiInterfaceDoc}}
+@Operation(operationId = "{{{nickname}}}", description = "{{{notes}}}")
+@APIResponses(value = { {{#responses}}
+    @APIResponse(responseCode = "{{{code}}}", description = "{{{message}}}"{{^vendorExtensions.x-java-is-response-void}},content = @Content({{#baseType}}schema = @Schema(implementation = {{{baseType}}}.class{{/baseType}}{{#containerType}}, type = SchemaType.ARRAY{{/containerType}})){{/vendorExtensions.x-java-is-response-void}}){{#hasMore}},{{/hasMore}}{{/responses}} }
+)
+{{/apiInterfaceDoc}}
+@{{httpMethod}}{{#subresourceOperation}}
+@Path("{{{path}}}"){{/subresourceOperation}}{{#hasConsumes}}
+@Consumes({ {{#consumes}}"{{{mediaType}}}"{{#hasMore}}, {{/hasMore}}{{/consumes}} }){{/hasConsumes}}{{#hasProduces}}
+@Produces({ {{#produces}}"{{{mediaType}}}"{{#hasMore}}, {{/hasMore}}{{/produces}} }){{/hasProduces}}
+{{^beanParam}}{{#returnResponse}}Response{{/returnResponse}}{{^returnResponse}}{{>returnTypeInterface}}{{/returnResponse}} {{nickname}}({{#parameters}}{{>queryParams}}{{>pathParams}}{{>headerParams}}{{>bodyParams}}{{>formParams}}{{#hasMore}},{{/hasMore}}{{/parameters}});{{/beanParam}}
+{{#beanParam}}{{#returnResponse}}Response{{/returnResponse}}{{^returnResponse}}{{>returnTypeInterface}}{{/returnResponse}} {{nickname}}(@BeanParam {{beanParamName}} beanParam{{#bodyParams}}, {{>bodyParams}}{{/bodyParams}});
+
+{{>beanParams}}
+{{/beanParam}}
