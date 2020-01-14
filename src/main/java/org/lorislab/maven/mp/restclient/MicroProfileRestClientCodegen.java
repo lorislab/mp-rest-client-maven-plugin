@@ -292,9 +292,11 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
             switch (jsonLib) {
                 case JSONB:
                     writePropertyBack(JSONB, true);
+                    writePropertyBack(JACKSON, false);
                     break;
                 case JACKSON:
                     writePropertyBack(JACKSON, true);
+                    writePropertyBack(JSONB, false);
                     break;
             }
         }
