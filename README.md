@@ -63,7 +63,7 @@ Extended parameters:
 ```xml
 <plugin>
     <groupId>org.lorislab.maven</groupId>
-    <artifactId>mp-restclient-plugin</artifactId>
+    <artifactId>mp-restclient-maven-plugin</artifactId>
     <version>0.5.0</version>
     <executions>
         <execution>
@@ -102,7 +102,7 @@ Extended parameters:
 ```xml
 <plugin>
     <groupId>org.lorislab.maven</groupId>
-    <artifactId>mp-restclient-plugin</artifactId>
+    <artifactId>mp-restclient-maven-plugin</artifactId>
     <version>0.5.0</version>
     <executions>
         <execution>
@@ -146,7 +146,7 @@ Extended parameters:
 ```xml
 <plugin>
     <groupId>org.lorislab.maven</groupId>
-    <artifactId>mp-restclient-plugin</artifactId>
+    <artifactId>mp-restclient-maven-plugin</artifactId>
     <version>0.5.0</version>
     <executions>
         <execution>
