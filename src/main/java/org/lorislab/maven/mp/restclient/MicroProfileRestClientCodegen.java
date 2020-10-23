@@ -24,6 +24,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,6 +44,16 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
      * The key for lombok data.
      */
     private static final String LOMBOK_DATA = "lombokData";
+
+    /**
+     * The key for field public.
+     */
+    private static final String IMPL_REST_CLASS = "implRestClass";
+
+    /**
+     * The key for field public.
+     */
+    static final String IMPL_PROXY = "implProxy";
 
     /**
      * The key for field public.
@@ -85,6 +96,11 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
     static final String FORMATTER = "formatter";
 
     /**
+     * Groups REST by tags
+     */
+    static final String GROUP_BY_TAGS = "groupByTags";
+
+    /**
      * The key for api name.
      */
     static final String API_NAME = "apiName";
@@ -98,6 +114,11 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
      * The key for api interface doc.
      */
     static final String API_SUFFIX = "apiSuffix";
+
+    /**
+     * The key for api interface doc.
+     */
+    static final String PROXY_CLIENT_CLASS = "proxyClientClass";
 
     /**
      * The key for api interface doc.
@@ -145,6 +166,11 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
     static final String FIELD_GEN = "fieldGen";
 
     /**
+     * The implementation type.
+     */
+    static final String IMPL_TYPE = "implType";
+
+    /**
      * The key for api interface doc.
      */
     static final String USE_BEAN_VALIDATION = "useBeanValidation";
@@ -173,6 +199,11 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
      * The api name.
      */
     private String apiName = null;
+
+    /**
+     * Group REST by tags
+     */
+    private boolean groupByTags = false;
 
     /**
      * The path prefix.
@@ -260,6 +291,7 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
             additionalProperties.put(BEAN_PARAM_COUNT, beanParamCount);
         }
 
+        groupByTags = updateBoolean(GROUP_BY_TAGS, groupByTags);
         format = updateBoolean(FORMATTER, format);
         updateBoolean(API_INTERFACE_DOC, true);
 
@@ -269,8 +301,8 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
         writePropertyBack(GENERATE_TO_STRING, false);
         writePropertyBack(GENERATE_GETTER_SETTER, false);
         if (additionalProperties.containsKey(FIELD_GEN)) {
-            FieldGenerator fieldgen = (FieldGenerator) additionalProperties.getOrDefault(FIELD_GEN, FieldGenerator.PUBLIC);
-            switch (fieldgen) {
+            FieldGenerator gen = (FieldGenerator) additionalProperties.getOrDefault(FIELD_GEN, FieldGenerator.PUBLIC);
+            switch (gen) {
                 case PUBLIC:
                     writePropertyBack(FIELD_PUBLIC, true);
                     break;
@@ -282,6 +314,31 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
                     writePropertyBack(GENERATE_TO_STRING, true);
                     writePropertyBack(GENERATE_GETTER_SETTER, true);
                     break;
+            }
+        }
+
+        boolean proxyImplementation = false;
+        updateBoolean(INTERFACE_ONLY, true);
+        boolean interfaceOnly = (Boolean) additionalProperties.get(INTERFACE_ONLY);
+        if (interfaceOnly) {
+            writePropertyBack(IMPL_REST_CLASS, false);
+        } else {
+            writePropertyBack(IMPL_REST_CLASS, true);
+            if (additionalProperties.containsKey(IMPL_TYPE)) {
+                ImplType impl = (ImplType) additionalProperties.getOrDefault(IMPL_TYPE, ImplType.CLASS);
+                switch (impl) {
+                    case CLASS:
+                        writePropertyBack(IMPL_REST_CLASS, true);
+                        break;
+                    case INTERFACE:
+                        writePropertyBack(IMPL_REST_CLASS, false);
+                        break;
+                    case PROXY:
+                        writePropertyBack(IMPL_REST_CLASS, true);
+                        writePropertyBack(IMPL_PROXY, true);
+                        proxyImplementation = true;
+                        break;
+                }
             }
         }
 
@@ -302,7 +359,7 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
         }
 
         updateBoolean(RETURN_RESPONSE, true);
-        updateBoolean(INTERFACE_ONLY, true);
+
 
         if (StringUtils.isBlank(templateDir)) {
             embeddedTemplateDir = templateDir = getTemplateDir();
@@ -315,6 +372,12 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
         modelDocTemplateFiles.remove("model_doc.mustache");
         apiDocTemplateFiles.remove("api_doc.mustache");
         supportingFiles.clear();
+
+        // do not generate the models. We will use the models from the rest client
+        if (proxyImplementation) {
+            modelDocTemplateFiles.clear();
+            modelTemplateFiles.clear();
+        }
     }
 
     /**
@@ -361,11 +424,8 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
      */
     @Override
     public String toApiName(String name) {
-        if (apiName != null) {
+        if (!groupByTags && apiName != null) {
             return apiName;
-        }
-        if (pathPrefix != null) {
-            name = name.replaceFirst(pathPrefix, "");
         }
         String computed = name;
         if (computed.length() == 0) {
@@ -380,37 +440,79 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
      */
     @Override
     public void addOperationToGroup(String tag, String resourcePath, Operation operation, CodegenOperation co, Map<String, List<CodegenOperation>> operations) {
-        String basePath = resourcePath;
-        if (pathPrefix != null) {
-            basePath = basePath.replaceFirst(pathPrefix, "");
-        }
-        if (basePath.startsWith("/")) {
-            basePath = basePath.substring(1);
-        }
-        int pos = basePath.indexOf('/');
-        if (pos > 0) {
-            basePath = basePath.substring(0, pos);
+        // groups REST services by tag
+        if (groupByTags) {
+            super.addOperationToGroup(tag, resourcePath, operation, co, operations);
+            return;
         }
 
-        if (basePath.equals("")) {
-            basePath = "default";
-        } else {
-            if (co.path.startsWith("/" + basePath)) {
-                co.path = co.path.substring(("/" + basePath).length());
-            }
-            co.subresourceOperation = !co.path.isEmpty();
+        // group REST service by REST-path
+        String restPath = resourcePath;
+        // remove the first /
+        if (restPath.startsWith("/")) {
+            restPath = restPath.substring(1);
         }
-        if (pathPrefix != null) {
-            co.baseName = pathPrefix + basePath;
-            if (co.path.startsWith("/")) {
-                co.path = co.path.substring(1);
-            }
-            co.path = co.path.replaceFirst(co.baseName, "");
+
+        // group all REST services in the schema to `/` to one file
+        if ((apiName != null && !apiName.isEmpty() && (pathPrefix == null || pathPrefix.isEmpty())) || "/".equals(pathPrefix)) {
+            co.baseName = "";
+            co.path = restPath;
+            co.subresourceOperation = !co.path.isEmpty();
         } else {
-            co.baseName = basePath;
+            // check the path prefix
+            if (pathPrefix != null && !pathPrefix.isEmpty()) {
+                // remove / from path prefix
+                String tmp = pathPrefix;
+                if (tmp.startsWith("/")) {
+                    tmp = tmp.substring(1);
+                }
+                // check if path start with `pathPrefix`
+                if (restPath.startsWith(tmp)) {
+                    co.baseName = tmp;
+                    int pathPrefixIndex = tmp.endsWith("/") ? tmp.length() : tmp.length() + 1;
+                    if (pathPrefixIndex <= restPath.length()) {
+                        co.path = restPath.substring(pathPrefixIndex);
+                    } else {
+                        co.path = "";
+                    }
+                    co.subresourceOperation = !co.path.isEmpty();
+                } else {
+                    log.warn("Resource path `" + resourcePath + "` does not start with a prefix `" + tmp + "` and will be ignored!");
+                    return;
+                }
+            } else {
+                // no common path prefix defined get first item of the path
+                int index = restPath.indexOf("/");
+                if (index > 0) {
+                    co.baseName = restPath.substring(0, index);
+                    co.path = restPath.substring(index);
+                } else {
+                    // no items in the path, set path to base
+                    co.baseName = restPath;
+                    co.path = "";
+                }
+                co.subresourceOperation = !co.path.isEmpty();
+            }
+
         }
         List<CodegenOperation> opList = operations.computeIfAbsent(co.baseName, v -> new ArrayList<>());
         opList.add(co);
+
+        // check multiple operation in one class
+        int counter = 0;
+        for (CodegenOperation op : opList) {
+            if (co.operationId.equals(op.operationId)) {
+                counter++;
+            }
+        }
+        // add the tag prefix for the operation.
+        // if there are multiple nickname the same name in one class generator add suffix _<number> later
+        if (counter > 1) {
+            co.nickname = camelize(tag + "-" + co.operationId, true);
+        }
+        co.operationIdLowerCase = co.operationId.toLowerCase();
+        co.operationIdCamelCase = camelize(co.operationId);
+        co.operationIdSnakeCase = underscore(co.operationId);
     }
 
     /**
@@ -419,6 +521,14 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
     @Override
     public boolean shouldOverwrite(String filename) {
         if (outputFiles != null) {
+            if (outputFiles.contains(filename)) {
+                File tmp = new File(filename);
+                String f = tmp.getName().replace(".java", "");
+                log.error("Wrong plugin configuration. Please check the API schema paths and maven configuration for <groupByTags>, <apiName> and <pathPrefix>.");
+                log.error("Add the maven configuration <apiName>{}<apiName>, remove <pathPrefix> and <groupByTags> to generate one java class for open API schema", f);
+                log.error("Remove the <groupByTags> if you what to have one file defined by <groupByTags> and the API schema has more tags.");
+                throw new IllegalStateException("File '" + tmp.getName() + "' already generated.");
+            }
             outputFiles.add(filename);
         }
         return super.shouldOverwrite(filename);
@@ -435,7 +545,7 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
                 Formatter gf = new Formatter();
                 outputFiles.forEach(file -> {
                     try {
-                        log.info("Formatter source code: {}", file);
+                        log.debug("Formatter source code: {}", file);
                         Path path = Paths.get(file);
                         String sourceString = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
                         sourceString = gf.formatSourceAndFixImports(sourceString);
@@ -464,6 +574,14 @@ public class MicroProfileRestClientCodegen extends AbstractJavaJAXRSServerCodege
             }
         }
         return false;
+    }
+
+    @Override
+    public CodegenModel fromModel(String name, Schema schema, Map<String, Schema> allSchemas) {
+        CodegenModel model = super.fromModel(name, schema, allSchemas);
+        // remove swagger schema
+        model.imports.remove("Schema");
+        return model;
     }
 
     /**

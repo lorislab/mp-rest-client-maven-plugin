@@ -3,6 +3,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonProperty;{{/jackson}}
 {{#jsonb}}import javax.json.bind.annotation.JsonbProperty;{{/jsonb}}
 
+{{#description}}
+/**
+* {{description}}
+**/{{/description}}
 public enum {{classname}} {
     {{#allowableValues}}
     {{#enumVars}}

@@ -9,6 +9,10 @@ import java.util.Objects;
     import javax.json.bind.annotation.JsonbProperty;
 {{/jsonb}}
 
+{{#description}}
+/**
+* {{description}}
+**/{{/description}}
 {{#discriminator}}{{>typeInfoAnnotation}}{{/discriminator}}
 {{#description}}{{/description}}
 {{#lombokData}}@Data{{/lombokData}}
