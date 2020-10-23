@@ -43,7 +43,7 @@
         <dependency>
             <groupId>io.swagger.codegen.v3</groupId>
             <artifactId>swagger-codegen</artifactId>
-            <version>3.0.10</version>
+            <version>3.0.22</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>io.swagger.codegen.v3</groupId>
             <artifactId>swagger-codegen-generators</artifactId>
-            <version>1.0.10</version>
+            <version>1.0.22</version>
         </dependency>
         <dependency>
             <groupId>com.google.googlejavaformat</groupId>
